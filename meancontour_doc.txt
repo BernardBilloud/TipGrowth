@@ -1,0 +1,145 @@
+===========
+MEANCONTOUR
+===========
+
+---------------------
+Bernard Billoud, 2018
+---------------------
+
+Introduction
+------------
+
+Meancontour compute the average symmetric contour of several cells. It has been
+written in order to provide initial profile data for Simultip. Both programs are
+part of the paper "The brown algal mode of tip growth: keeping stress under
+control" by Hervé Rabillé *et al*.
+
+Installing
+----------
+
+Requirements
+~~~~~~~~~~~~
+
+Meancontour has been written and tested in a Gnome-Ubuntu environment. Other
+unix-like environments should be able to run it.
+
+Meancontour requires Python3 installed, by default in ``/usr/bin/python3``. If
+your configuration does not match, you can either change the path in the first
+line of the script (make sure you leave the ``#!`` characters at the begining
+of line), or -- preferably -- create a symbolic link in ``/usr/bin``, pointing
+to the actual location of your ``python3`` executable.
+
+In addition, some common libraries have to be installed:
+
+* ``os``, ``arparse``, ``sys``, ``time``, ``datetime``
+* ``numpy``, ``scipy``, ``matplotlib``
+
+How to install
+~~~~~~~~~~~~~~
+
+There is no installation procedure, just uncompress the directory and cd into
+it::
+
+  tar zxf TipGrowthSoftware.tgz
+  cd TipGrowth
+
+The ``meancontour.py`` script comes with another file named ``tiputil.py``,
+which has to be present:
+
+* in the same directory as ``simultip.py`` (by default);
+* or in the appropriate directory of your ``python3`` installation;
+* or anywhere in the directory tree provided there is a link named
+  ``tiputil.py`` in either of the two places mentioned above
+
+Parameters and options
+----------------------
+
+Command line arguments
+~~~~~~~~~~~~~~~~~~~~~~
+
+Usage is::
+
+ meancontour.py [-d DENSITY] [-w WINDOW] [-r RANGE]
+ [-c CONTOUR] [-t TIP] [-s SMOOTH] [-h] [-v] [-D DEPTH]
+ infile
+
+Only ``infile`` is mandatory. Other parameter have default values.
+
+Optional arguments (with default value in parenthesis):
+
+-d DENSITY, --density DENSITY  density of intrapolated points, in points/µm
+                               (50).
+-w WINDOW, --window WINDOW     window width in nm (100).
+-r RANGE, --range RANGE        meridional abscissa range (30)
+-c CONTOUR, --contour CONTOUR  contour color (``'#ff00aa'``).
+-t TIP, --tip TIP              tip color (``'#55aaaa'``).
+-s SMOOTH, --smooth SMOOTH     smoothing of contour spline (1.5).
+-h, --help                     show this help message and exit.
+-v, --verbose                  write to stdout while working (do not write
+                               anything).
+-D DEPTH, --depth DEPTH        maximum depth of stack (5000).
+
+Input file
+~~~~~~~~~~
+
+The input file is tab-delimited and contains in order:
+
+ * 1 line made of ``*`` followed by the dataset name
+ * n lines, one per image to process. Each line contains the path to a file
+   image, followed by the width in µm, and if needed, other parameters to apply
+   to this image (typically smoothing). The options given here override those
+   on the command-line.
+
+Each image is expected to be a black and white photo, on which with the contour
+is drawn as a one-pixel wide line, and the tip denoted as a single pixel. Colors
+for these elements can be choosen, default are pink and blue, respectively.
+
+Output
+~~~~~~
+
+Meancontour creates a file called ``DATASET_dat.tab`` where ``DATASET`` is the
+actual dataset name, with the following fields::
+
+  X, Y, s, Phi, Kappa_s, Kappa_t, Nu
+  
+``X`` and ``Y`` are the coordinates of the point, ``s`` its meridional abscissa,
+``Phi`` the angle between the normal and the cell axis, ``Kappa_s`` and
+``Kappa_t`` the two main curvatures and ``Nu`` the flow coupling.
+
+In addition, a ``pdf`` file is produced, showing all processing steps.
+
+Licence
+-------
+
+The software and associated documentation is © Bernard Billoud /
+Morphogenesis of Macro-Algae team (CNRS/Sorbonne Université)
+
+This software is governed by the CeCILL-B license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/or redistribute the software under the terms of the CeCILL-B
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-B license and that you accept its terms.
+
+.. Note: to produce a pdf file from this rst source, use rst2latex from package Docutils, then pdflatex:
+.. rst2latex meancontour_doc.txt | sed 's/Φ/$\\Phi$/g ; s/σy/$\\sigma_y$/g ; s/×/$\\times$/g ; s/∈/$\\in$/g ; s/Δ/$\\Delta$/g ; s/⁻¹/$^{-1}$/g ; s/Kappa\\_s/$\\kappa_s$/g' > meancontour_doc.tex ; pdflatex meancontour_doc.tex
+

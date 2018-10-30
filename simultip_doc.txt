@@ -1,0 +1,320 @@
+========
+SIMULTIP
+========
+
+---------------------
+Bernard Billoud, 2018
+---------------------
+
+Introduction
+------------
+
+Simultip simulates tip growth using the viscoplastic model [#Dumais]_,
+with the assumptions of thin wall, transverse isotropy and orthogonal
+growth. It has been written in order to assess and test hypotheses
+developped in the paper "The brown algal mode of tip growth: keeping stress
+under control" by Hervé Rabillé *et al*.
+
+.. [#Dumais] Dumais, J., Shaw, S. L., Steele, C. R., Long, S. R. & Ray,
+   P. M. (2006) An anisotropic-viscoplastic model of plant cell
+   morphogenesis by tip growth. *The International Journal of
+   Developmental Biology* **50**, 209-222.
+
+Installing
+----------
+
+Requirements
+~~~~~~~~~~~~
+
+Simultip has been written and tested in a Gnome-Ubuntu environment. Other
+unix-like environments should be able to run it.
+
+Simultip requires Python3 installed, by default in ``/usr/bin/python3``.
+If your configuration does not match, you can either change the path in
+the first line of the script (make sure you leave the ``#!`` characters
+at the begining of line), or -- preferably -- create a symbolic link in
+``/usr/bin``, pointing to the actual location of your ``python3``
+executable.
+
+Some common Python3 libraries have to be installed:
+
+* ``os``, ``argparse``, ``sys``, ``time``, ``datetime``
+* ``numpy``, ``scipy``, ``matplotlib``
+
+For graphical output, LaTeX is required, with packages:
+
+* ``lang-greek``, ``latex-extra``, ``science``
+
+In addition, output in ``pdf`` requires:
+
+* ``dvipng``
+
+How to install
+~~~~~~~~~~~~~~
+
+There is no installation procedure, just uncompress the directory and cd
+into it::
+
+  tar zxf TipGrowthSoftware.tgz
+  cd TipGrowth
+
+The ``simultip.py`` script comes with another file named ``tiputil.py``,
+which has to be present:
+
+* in the same directory as ``simultip.py`` (by default);
+* or in the appropriate directory of your ``python3`` installation;
+* or anywhere in the directory tree provided there is a link named
+  ``tiputil.py`` in either of the two places mentioned above
+
+Examples in the section below should run directly.
+
+Parameters and options
+----------------------
+
+Command line arguments
+~~~~~~~~~~~~~~~~~~~~~~
+
+Usage is::
+
+ simultip.py [-h] [-u UNIQUE] [-S SMOOTH] [-T TURGOR] [-w WALL]
+ [-m MINWALL] [-z HALFZONE] [-n NUMSTEPS] [-o OVERHANG]
+ [-d DELTA] [-s SECONDSBYSTEP] [-g GROWTHBYSUB] [-p PHI]
+ [-r RANGEFORPHI] [-i IFORPHI] [-y SIGY] [-a RANGEFORY]
+ [-j JFORY] [-e EXPGRO] [-R REFFILE] [-f FILEOUT]
+ [-E EXPDOTEPSTAR] [-c] [-b] [-k] [-Z] [-v] [-V]
+ infile
+
+Only ``infile`` is mandatory. Other parameter have default values suitable
+for *Ectocarpus* tip growth simulation, and are expected to give absolutely
+useless results in any other case.
+
+Optional arguments (with default value in parenthesis):
+
+-T TURGOR, --turgor TURGOR                       default turgor pressure,
+                                                 in MPa (0.495).
+-w WALL, --wall WALL                             cell wall thickness in µm,
+                                                 or maximum thickness in
+                                                 case of thickness
+                                                 gradient (0.591).
+-m MINWALL, --minwall MINWALL                    cell wall minimum
+                                                 thickness, in µm (0.0362).
+-z HALFZONE, --halfzone HALFZONE                 width of half-thickness
+                                                 zone, in µm (16.81).
+-p PHI, --phi PHI                                Φ = cell wall
+                                                 extensibility in
+                                                 min⁻¹·MPa⁻¹ (2.51E-3).
+-r RANGEFORPHI, --rangeforphi RANGEFORPHI        Φ range for heatmap, in
+                                                 min⁻¹·MPa⁻¹ (0.5E-3).
+-i IFORPHI, --iforphi IFORPHI                    Φ increase for heatmap,
+                                                 in min⁻¹·MPa⁻¹ (0.5E-3).
+-y SIGY, --sigy SIGY                             σy = stress yield
+                                                 threshold in MPa (11.18).
+-a RANGEFORY, --rangefory RANGEFORY              σy range for heatmap in
+                                                 MPa (1.0).
+-j JFORY, --jfory JFORY                          σy increase for heatmap
+                                                 in MPa (1.0).
+-e EXPGRO, --expgro EXPGRO                       expected growth rate in
+                                                 µm·h⁻¹ (2.5).
+
+-n NUMSTEPS, --numsteps NUMSTEPS                 number of simulation
+                                                 steps; no maximum if set
+                                                 to 0 (5000).
+-o OVERHANG, --overhang OVERHANG                 maximum advance; no
+                                                 maximum if set to 0;
+                                                 automatic if < 0 (25.0).
+-d DELTA, --delta DELTA                          write output every Δ
+                                                 steps or µm overhang (1).
+-s SECONDSBYSTEP, --secondsbystep SECONDSBYSTEP  time in seconds for 1
+                                                 step (60.0).
+-g GROWTHBYSUB, --growthbysub GROWTHBYSUB        growth, in nm by substep
+                                                 (1.0).
+-S SMOOTH, --smooth SMOOTH                       smoothing factor of
+                                                 contour spline (0.0).
+-R REFFILE, --Reffile REFFILE                    Reference file for
+                                                 contour, useful to
+                                                 compare grown cell
+                                                 contour to a reference
+                                                 contour other than
+                                                 initial contour
+                                                 (reference = initial).
+
+-u UNIQUE, --unique UNIQUE                       if there is more than
+                                                 one dataset in input
+                                                 file, use only the
+                                                 specified dataset (use
+                                                 all).
+-f FILEOUT, --fileout FILEOUT                    file for output
+                                                 (``simultip_out_XXX.tab``
+                                                 where ``XXX`` is the
+                                                 Process ID).
+-E EXPDOTEPSTAR, --expdotepstar EXPDOTEPSTAR     name of
+                                                 Sigmae_ExpDotEpsilonStar file
+                                                 (do not write).
+-c, --charts                                     draw ``png`` charts for
+                                                 initital state (no charts
+                                                 drawn).
+-b, --beforeafter                                draw before/after as
+                                                 ``pdf`` (no ``pdf`` file).
+-k, --kinematics                                 produce (many) ``png``
+                                                 images to follow growth.
+-Z, --zoom                                       produce zoomed kinematics
+                                                 (no zoom images).
+
+-h, --help                                       show help message and
+                                                 exit.
+-v, --voluble                                    write to ``stdout`` while
+                                                 working (do not write
+                                                 anything).
+-V, --verbose                                    write too much to
+                                                 ``stdout`` while working
+                                                 (do not write anything).
+
+Input file
+~~~~~~~~~~
+
+Input file contains in order:
+
+ * 0, 1 or more line(s) of options
+ * 1 header line for dat
+ * n data lines
+
+An option line is tab-delimited and contains the following fields:
+
+ * 1 parameter name
+ * 1 option type which can be ``constant`` or a function name among
+   ``sigmoid``, ``gaussian``, ``lockhart``, ``pearson``, ``file``.
+ * 1 or more value(s) which is either the constant value, or the
+   parameters of the function, or the file name.
+ 
+The options given here override those on the command-line. Note that only
+constant values can be set on command line, except for cell wall thickness
+(this program **is** *Ectocarpus* oriented).
+
+The header line gives the names of the data, and must contain the
+following :
+``Set``, ``R``, ``X``, ``s``, ``Phi``, ``Kappa_s``, ``Kappa_t``, ``Nu``
+in any order except first column which has to be ``Set``.
+
+Each data line contains values, in the order given by the header.
+
+The friend program ``meancontour.py`` gives suitable header and data lines.
+
+Output
+~~~~~~
+
+By default, simultip creates a file named ``simultip_out_XXX.tab`` where
+``XXX`` is the Process ID, so successive runs will not overwrite the file.
+The output is a tab-delimited file containing the following fields, in
+order:
+
+``Dataset``, ``Phi``, ``Sigma_y``, ``Time``, ``G``, ``logRk``, ``logRd``, ``logRe``.
+
+If a "before/after" ``pdf`` is requested (option ``-b``) then the file is
+named:
+
+``Simulated_NNN_PPPxSSS_XXX.pdf``
+
+where ``NNN`` is the dataset name, ``PPP`` and ``SSS`` are the number of
+different values in Φ and σy ranges, respectively, and ``XXX`` the Process
+ID. Note that this option is useless if Φ and/or σy vary with the abscissa
+(using a function or file). The ``pdf`` file shows, for each combination of
+Φ and σy, the initial and final cell shape and meridional curvature (kappa_s)
+plot.
+
+If kinematics are requested, then the program creates directories named
+``Global``, ``Vert`` and, in case option ``-Z`` is used, ``Zoom``. Each
+directory receives ``png`` files representing the cell state at each time
+step.
+
+Examples of use
+---------------
+
+Here are some examples which should run out-of-the box:
+
+Launch 9 Ectocarpus simulations with default values:
+(Φ,σy) ∈ {2.01E-3, 2.51E-3, 3.01E-3}×{10.18, 11.18, 12.18};
+output to a 3×3 heatmap with color scale, data in ``simultip_out_XXXX.tab``
+and several indications on terminal::
+   
+   ./simultip.py -v Ectocarpus_data.tab 
+
+Same simulation array, but force duration to 10h;
+output like previous run, along with ``pdf`` charts::
+   
+   ./simultip.py -n 600 -o 0 -d 60 -b -v Ectocarpus_data.tab
+
+Various heatmaps to locate the best region::
+ 
+   ./simultip.py -p 4.0E-3 -r 2.0E-3 -i 0.5E-3\
+   -y 10 -a 2 -j 0.5 -v Ectocarpus_data.tab
+
+   ./simultip.py -p 2.5E-3 -r 0.5E-3 -i 0.1E-3\
+   -y 11.0 -a 1.0 -j 0.2 -v Ectocarpus_data.tab
+
+   ./simultip.py -p 2.5E-3 -r 0.05E-3 -i 0.01E-3\
+   -y 11.20 -a 0.05 -j 0.01 -v Ectocarpus_data.tab
+
+Launch Ectocarpus simulation with default Φ and σy values,
+show results as kinematics, *ie* ``png`` files; output to
+``simultip_out_XXXX.tab``::
+   
+   ./simultip.py -r 0.0 -a 0.0 -k Ectocarpus_data.tab
+
+Troubleshouting
+---------------
+
+If you get a warning like this::
+
+  can't invoke "event" command: application has been destroyed
+      while executing
+  "event generate $w <<ThemeChanged>>"
+      (procedure "ttk::ThemeChanged" line 6)
+      invoked from within
+  "ttk::ThemeChanged"
+
+Then edit (or create) ``~/.config/matplotlib/matplotlibrc`` and add::
+
+  backend : agg
+
+
+Licence
+-------
+
+The software and associated documentation is © Bernard Billoud /
+Morphogenesis of Macro-Algae team (CNRS/Sorbonne Université)
+
+This software is governed by the CeCILL-B license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/or redistribute the software under the terms of the CeCILL-B
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-B license and that you accept its terms.
+
+.. Note: to produce a pdf file from this rst source, use rst2latex from
+.. package Docutils, then pdflatex. To do so and fix character encoding
+.. issues, just copy the following as one single line in terminal (make
+.. sure the current woking directory is where ``simultip_doc.txt`` is):
+.. rst2latex simultip_doc.txt | sed 's/Φ/$\\Phi$/g ; s/σy/$\\sigma_y$/g ;
+.. s/×/$\\times$/g ; s/∈/$\\in$/g ; s/Δ/$\\Delta$/g ; s/⁻¹/$^{-1}$/g ;
+.. s/kappa\\_s/$\\kappa_s$/g' > simultip_doc.tex ; pdflatex
+.. simultip_doc.tex
+
